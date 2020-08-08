@@ -30,13 +30,15 @@ const Login = (props) => {
   );
 
   const mutate = useCallback(() => {
-    executeMutation({ email, password, name }).then(({ data }) => {
-      const token = data && data[isLogin ? 'login' : 'signup'].token;
-      if (token) {
-        setToken(token);
-        props.history.push('/');
-      }
-    });
+    executeMutation({ email, password, name })
+      .then(({ data }) => {
+        const token = data && data[isLogin ? 'login' : 'signup'].token;
+        if (token) {
+          setToken(token);
+          props.history.push('/');
+        }
+      })
+      .catch((e) => console.log(e.message));
   }, [executeMutation, props.history, isLogin, email, password, name]);
 
   return (
