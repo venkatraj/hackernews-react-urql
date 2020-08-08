@@ -1,7 +1,44 @@
 import React, { useMemo, useCallback, Fragment } from 'react';
 import Link from './Link';
-import { useQuery } from 'urql';
+import { useQuery, useSubscription } from 'urql';
 import gql from 'graphql-tag';
+
+const NEW_VOTES_SUBSCRIPTION = gql`
+  subscription {
+    newVote {
+      link {
+        id
+        votes {
+          id
+          user {
+            id
+          }
+        }
+      }
+    }
+  }
+`;
+
+const NEW_LINKS_SUBSCRIPTION = gql`
+  subscription {
+    newLink {
+      id
+      url
+      description
+      createdAt
+      postedBy {
+        id
+        name
+      }
+      votes {
+        id
+        user {
+          id
+        }
+      }
+    }
+  }
+`;
 
 const FEED_QUERY = gql`
   query FeedQuery($first: Int, $skip: Int, $orderBy: LinkOrderByInput) {
@@ -44,6 +81,9 @@ const LinkList = (props) => {
 
   const [result] = useQuery({ query: FEED_QUERY, variables });
   const { data, fetching, error } = result;
+
+  useSubscription({ query: NEW_VOTES_SUBSCRIPTION });
+  useSubscription({ query: NEW_LINKS_SUBSCRIPTION });
 
   const linksToRender = useMemo(() => {
     if (!data) {
