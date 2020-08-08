@@ -7,8 +7,26 @@ import { BrowserRouter } from 'react-router-dom';
 import './styles/index.css';
 import App from './components/App';
 import { getToken } from './token';
+import { FEED_QUERY } from './components/LinkList';
 
-const cache = new cacheExchange({});
+const cache = new cacheExchange({
+  updates: {
+    Mutation: {
+      post: ({ post }, _args, cache) => {
+        const variables = { first: 3, skip: 0, orderBy: 'createdAt_DESC' };
+        cache.updateQuery({ query: FEED_QUERY, variables }, (data) => {
+          if (data !== null) {
+            data.feed.links.unshift(post);
+            data.feed.count++;
+            return data;
+          } else {
+            return null;
+          }
+        });
+      },
+    },
+  },
+});
 
 const client = new Client({
   url: 'http://localhost:4000',
