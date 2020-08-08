@@ -1,0 +1,60 @@
+import React, { useState, useCallback } from 'react';
+import gql from 'graphql-tag';
+import { useMutation } from 'urql';
+
+const POST_MUTATION = gql`
+  mutation PostMutation($description: String!, $url: String!) {
+    post(description: $description, url: $url) {
+      id
+      createdAt
+      url
+      description
+      postedBy {
+        id
+        name
+      }
+      votes {
+        id
+        user {
+          id
+        }
+      }
+    }
+  }
+`;
+
+const CreateLink = (props) => {
+  const [description, setDescription] = useState('');
+  const [url, setUrl] = useState('');
+  const [state, executeMutation] = useMutation(POST_MUTATION);
+
+  const submit = useCallback(() => {
+    executeMutation({ url, description });
+  }, [executeMutation, url, description]);
+
+  return (
+    <div>
+      <div className="flex flex-column mt3">
+        <input
+          className="mb2"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          type="text"
+          placeholder="A description for the link"
+        />
+        <input
+          className="mb2"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          type="text"
+          placeholder="The URL for the link"
+        />
+        <button disabled={state.fetching} onClick={submit}>
+          Submit
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default CreateLink;
